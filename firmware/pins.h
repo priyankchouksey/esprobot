@@ -1,0 +1,9 @@
+#define SRV_CNT 8 // Total Number of Servos
+#define SRV0 = 04 // Front Right Foot
+#define SRV1 = 02 // Front Right Leg
+#define SRV2 = 14 // Rear Right Leg
+#define SRV3 = 15 // Rear Right Foot 
+#define SRV4 = 13 // Front Left Foot
+#define SRV5 = 12 // Front Left Leg
+#define SRV6 = 01 // Rear Left Leg
+#define SRV7 = 03 // Rear Left Foot

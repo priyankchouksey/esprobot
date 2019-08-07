@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="title"></title>
+    <!-- Uncomment for local development -->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- For Local development-->
+    <link rel="stylesheet" type="text/css" href="esps.css">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">WiFi Moodlights</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#home">Home</a></li>
+                    <li class="hidden"><a href="#stream">Live View</a></li>
+                    <li><a href="#config">Config</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#admin">Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div id="home" class="mdiv anchor">
+            <fieldset>
+                <legend class="esps-legend">Effects</legend>
+                <form class="form-horizontal" onsubmit="return false">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="t_mode">Mode</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="tmode" name="tmode" onchange="effectChanged()">
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Effect Options -->
+                    <div id="t_options">
+                        <legend class="esps-legend">Effect Options</legend>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" id="lab_color" for="t_color">Color</label>
+                            <div class="col-sm-10" id="div_color">
+                                <input type="button" id="t_color" class="form-control color no-alpha" value="rgb(255,255,255)" />
+                            </div>
+                            <div class="col-sm-offset-2 col-sm-10" id="div_reverse">
+                                <div class="checkbox"><label><input type="checkbox" id="t_reverse" class="reverse" name="t_reverse">Reverse pattern</label></div>
+                            </div>
+                            <div class="col-sm-offset-2 col-sm-10" id="div_mirror">
+                                <div class="checkbox"><label><input type="checkbox" id="t_mirror" class="mirror" name="t_mirror">Mirror pattern</label></div>
+                            </div>
+                            <div class="col-sm-offset-2 col-sm-10" id="div_allleds">
+                                <div class="checkbox"><label><input type="checkbox" id="t_allleds" class="allleds" name="t_allleds">All leds same </label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Effect Relay -->
+                    <div class="t_relay hidden">
+                        <legend class="esps-legend">Send Effect LED Data</legend>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="t_sendprotocol">Protocol</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="t_sendprotocol" name="t_sendprotocol" onchange="sendChanged()">
+                            <option value="0">Disabled</option>
+                            <option value="1">UDP Raw</option>
+                            <option value="2">E.131</option>
+                        </select>
+                            </div>
+                        </div>
+                        <div class="form-group sendeffect">
+                            <label class="control-label col-sm-2" for="t_sendhost">Target Host</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" id="t_sendhost" name="t_sendhost" placeholder="Target Host/IP"></div>
+                        </div>
+                        <div class="form-group sendeffect">
+                            <label class="control-label col-sm-2" for="t_sendport">UDP Port</label>
+                            <div class="col-sm-10"><input type="number" class="form-control" id="t_sendport" name="t_sendport" placeholder="Target UDP Port"></div>
+                        </div>
+                        <div class="form-group sendeffect">
+                            <label class="control-label col-sm-2" for="t_sendspeed">Packet/sec</label>
+                            <div class="col-sm-10"><input type="number" class="form-control" id="t_sendspeed" name="t_sendspeed" placeholder="Packets per Second"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group t_startup">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" onclick="submitStartupEffect()" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+
+                </form>
+            </fieldset>
+        </div>
+        <!-- View Stream -->
+        <div id="stream" class="mdiv hidden anchor">
+            <fieldset>
+                <legend class="esps-legend">Live Stream View</legend>
+                <form class="form-horizontal" onsubmit="return false">
+                    <div id="t_view">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="t_color">Display</label>
+                            <div class="col-sm-10">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-primary">
+                            <input type="radio" name="viewStyle" value="RGB" autocomplete="off" onchange="clearStream()">RGB
+                        </label>
+                                    <label class="btn btn-primary">
+                            <input type="radio" name="viewStyle" value="Channel" autocomplete="off" onchange="clearStream()">Channel
+                        </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="v_columns">Columns</label>
+                            <div class="col-sm-10"><input type="number" class="form-control" id="v_columns" name="v_columns" oninput="clearStream()"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12"><canvas id="canvas" width="820" height="960"></canvas></div>
+                        </div>
+                    </div>
+
+                </form>
+            </fieldset>
+        </div>
+        <div id="admin" class="mdiv hidden anchor">
+            <div class="row">
+                <div class="col-sm-6">
+                    <fieldset>
+                        <legend class="esps-legend">System Information</legend>
+                        <table class="esps-table">
+                            <tr>
+                                <td width="50%">FW Version</td>
+                                <td><span id="x_version"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="50%">Build Date</td>
+                                <td><span id="x_built"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="50%">Firmware Flash Size</td>
+                                <td><span id="x_usedflashsize"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="50%">Physical Flash Size</td>
+                                <td><span id="x_realflashsize"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="50%">Flash chip ID</td>
+                                <td><span id="x_flashchipid"></span></td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </div>
+
+                <div class="col-sm-6">
+                    <fieldset>
+                        <legend class="esps-legend">Administration</legend>
+                        <div class="col-sm-offset-0 col-sm-6">
+                            <form class="form-horizontal" id="updatefw" action="/updatefw" method="post" enctype="multipart/form-data">
+                                <label class="btn btn-block btn-primary btn-file">
+                        Update Firmware <input type="file" id="efu" name="file" accept=".efu" style="display: none;">
+                    </label>
+                            </form>
+                        </div>
+
+                        <div class="col-sm-offset-0 col-sm-6">
+                            <button type="button" onclick="reboot()" class="btn btn-block btn-danger">Reboot</button>
+                        </div>
+
+                        <div class="col-sm-offset-0 col-sm-6">
+                            <button type="button" onclick="window.open('/config.json')" class="btn btn-block btn-primary">Backup Config</button>
+                        </div>
+
+                        <div class="col-sm-offset-0 col-sm-6">
+                            <form class="form-horizontal" id="restoreForm" action="/config" method="post" enctype="multipart/form-data">
+                                <label class="btn btn-block btn-primary btn-file">
+                        Restore Config <input type="file" id="restoreFile" name="file" accept=".json" style="display: none;">
+                    </label>
+                            </form>
+                        </div>
+
+                    </fieldset>
+                </div>
+
+            </div>
+        </div>
+        <div id="config" class="mdiv hidden anchor">
+            <!-- Network Confiduration-->
+            <fieldset>
+                <legend class="esps-legend"> Configuration</legend>
+                <form class="form-horizontal">
+                    <div class="form-group" id="fg_ssid">
+                        <label class="control-label col-sm-2" for="ssid">SSID</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter SSID"></div>
+                    </div>
+                    <div class="form-group" id="fg_password">
+                        <label class="control-label col-sm-2" for="password">Password</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="password" name="password" placeholder="Enter Password"></div>
+                    </div>
+                    <div class="form-group" id="fg_hostname">
+                        <label class="control-label col-sm-2" for="hostname">Hostname</label>
+                        <div class="col-sm-10"><input type="text" class="form-control has-error" id="hostname" name="hostname" placeholder="Enter Hostname"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="dhcp" name="dhcp"> Use DHCP</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group dhcp" id="fg_ip">
+                        <label class="control-label col-sm-2" for="ip">IP</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="ip" name="ip" placeholder="xxx.xxx.xxx.xxx"></div>
+                    </div>
+                    <div class="form-group dhcp" id="fg_netmask">
+                        <label class="control-label col-sm-2" for="netmask">Netmask</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="netmask" name="netmask" placeholder="xxx.xxx.xxx.xxx"></div>
+                    </div>
+                    <div class="form-group dhcp" id="fg_gateway">
+                        <label class="control-label col-sm-2" for="gateway">Gateway</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="gateway" name="gateway" placeholder="xxx.xxx.xxx.xxx"></div>
+                    </div>
+
+                    <!-- UDP Configuration -->
+                    <div class="form-group hidden">
+                        <legend class="esps-legend">UDP Configuration</legend>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <div class="checkbox"><label><input type="checkbox" id="udp_enabled" name="udp_enabled"> Enable UDP Raw </label></div>
+                            </div>
+                        </div>
+                        <div class="form-group" id="fg_udpport">
+                            <label class="control-label col-sm-2" for="ssid">UDP Raw Port</label>
+                            <div class="col-sm-10"><input type="number" class="form-control" id="udp_port" name="udp_port" placeholder="Enter UDP Port"></div>
+                        </div>
+                    </div>
+                    <!-- Pixel Configuration -->
+                    <legend class="esps-legend">Pixel Configuration</legend>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="p_count">Pixel Count</label>
+                        <div class="col-sm-10">
+                            <input type="number" step="1" class="form-control" id="p_count" name="p_count" placeholder="Enter number of pixels" onchange="refreshPixel()">
+                            <button type="button" onclick="showCountPixels()" class="btn btn-primary">Count</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="p_type">Pixel Type</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="p_type" name="p_type" onclick="refreshPixel()"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="p_color">Color Order</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="p_color" name="p_color"></select>
+                        </div>
+                    </div>
+                    <div class="form-group hidden">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="p_gamma" name="p_gamma"> Gamma Correction</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group hidden">
+                        <label class="control-label col-sm-2" for="p_gammaVal">Gamma Value</label>
+                        <div class="col-sm-3"><input type="number" step="0.1" class="form-control" id="p_gammaVal" name="p_gammaVal" placeholder="Gamma Value" onchange="refreshPixel()"></div>
+                        <label class="control-label col-sm-2" for="p_briteVal">Brightness</label>
+                        <div class="col-sm-3"><input type="number" step="0.1" class="form-control" id="p_briteVal" name="p_briteVal" placeholder="Brightness" onchange="refreshPixel()"></div>
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox"><label><input type="checkbox" id="showgamma" name="showgamma"> Show Gamma Curve</label></div>
+                        </div>
+                    </div>
+                    <div class="form-group hidden">
+                        <!-- MQTT Configuration -->
+                        <legend class="esps-legend">MQTT Configuration</legend>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <div class="checkbox"><label><input type="checkbox" id="mqtt" name="mqtt"> Enable MQTT</label></div>
+                            </div>
+                        </div>
+                        <div class="form-group mqtt">
+                            <label class="control-label col-sm-2" for="mqtt_ip">Broker IP</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_ip" name="mqtt_ip" placeholder="Enter MQTT Broker IP"></div>
+                        </div>
+                        <div class="form-group mqtt">
+                            <label class="control-label col-sm-2" for="mqtt_port">Broker Port</label>
+                            <div class="col-sm-10"><input type="number" step="1" class="form-control" id="mqtt_port" name="mqtt_port" placeholder="Enter MQTT Broker Port"></div>
+                        </div>
+                        <div class="form-group mqtt">
+                            <label class="control-label col-sm-2" for="mqtt_user">User</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_user" name="mqtt_user" placeholder="Enter MQTT User (optional)"></div>
+                        </div>
+                        <div class="form-group mqtt">
+                            <label class="control-label col-sm-2" for="mqtt_password">Password</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_password" name="mqtt_password" placeholder="Enter MQTT Password (optional)"></div>
+                        </div>
+                        <div class="form-group mqtt">
+                            <label class="control-label col-sm-2" for="mqtt_topic">Topic</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" id="mqtt_topic" name="mqtt_topic" placeholder="Enter Top Level MQTT Topic"></div>
+                        </div>
+                        <div class="form-group mqtt">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <div class="checkbox"><label><input type="checkbox" id="mqtt_clean" name="mqtt_clean"> Clean Session</label></div>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                    <!-- Device Config Save -->
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" onclick="submitConfig()" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Snack bar-->
+    <div id="snackbar">Configuration Saved</div>
+
+    <!-- Reboot Modal -->
+    <div id="reboot" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Restarting, Please Wait</h4>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Modal -->
+    <div id="update" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Firmware Updating</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Firmware update in progress...</p>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WebSockets Error Modal -->
+    <div id="wserror" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">WebSocket connection lost, attempting to reconnect...</h4>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <i><span id="name"></span></i>
+        </div>
+    </footer>
+    <!-- Uncomment for local development -->
+    <script type="text/javascript" src="js/jquery-3.1.1.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/jqColorPicker.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+    <!--Local Development-->
+    <script type="text/javascript" src="esps.js"></script>
+    <script>
+        wsConnect();
+    </script>
+</body>
